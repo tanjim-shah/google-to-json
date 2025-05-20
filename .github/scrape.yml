@@ -1,0 +1,34 @@
+name: Scrape Google Suggestions
+
+on:
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m playwright install
+
+      - name: Run scraping script
+        run: python scrape.py
+
+      - name: Commit and push results
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add output.json
+          git commit -m "Updated output.json with latest Google suggestions" || echo "No changes to commit"
+          git push
